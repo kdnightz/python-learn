@@ -1,2 +1,2 @@
-# python-first
-# 自学 python 第一步
+# python-learn
+# 自学 python 
