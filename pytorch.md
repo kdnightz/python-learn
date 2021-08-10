@@ -328,7 +328,233 @@
 3. 常见导数的计算
 
    1. 。
-   2. <img src="img/7.png" alt="7" style="zoom: 67%;" />
+   2. 
 
 4. 反向传播
+
+   1. <img src="img/7.png" alt="7" style="zoom: 67%;" />
+
+1. 1. 1. 计算图
+         1. 把数据和操作通过图来表示
+      2. 反向传播
+         1. 从后往前，计算每一层的梯度
+
+   2. pytorch完成线性回归
+
+      1. 
+
+         ```python
+         import torch
+         x = torch.ones(2,2,requires_gead=True)# 初始化参数x并设置requires_grad=True用来追踪其计算历史
+         print(x)
+         #		tensor([[1.,1.],
+         #			    [1.,1.]],requires_grad=True
+         y=x+2
+         print(y)
+         #		tensor([[3.,3.],
+         #			    [3.,3.]],requires_grad=True
+         z = y*y*3
+         print(x)
+         #		tensor([[27.,27.],
+         #			    [27.,27.]],requires_grad=True
+         out = z.mean()#求平均值
+         print(out)
+         #tensor(27.,grad_fn=<MeanBackward0>)
+         ```
+
+         从上述代码可以看出：
+
+         ​	1.x的requires_grad属性为True
+
+         ​	2.之后的每次计算都会修改其grad_fn属性，用来记录做过的操作
+
+         ​			1.通过这个函数和grad_fn能够组成一个和前一小节类似的计算图
+
+         
+
+      2. tensor(data,requird_grad=True)
+
+         1. 该tensor后续会被计算梯度
+         2. tensor所有的操作都会被记录在grad_fn
+
+      3. with torch.no_grad():
+
+         1. 其中的操作不会被追踪
+
+      4. 反向传播：output.backward()
+
+      5. 获取梯度：x.grad  累加梯度
+
+         1. 所以：每次反向传播之前，需要先把梯度置为0之后，再进行后边的反向传播
+
+      6. tensor.data:
+
+         1. 当 a.requires_grad_(True)时，a和a.data是有区别的
+         2. 区别在于 a 是输出tensor 的全部  包括 grad属性
+         3. a.data只是取数值 不带属性。
+
+      7. tensor.numpy():
+
+         1. requires_grad=True时不能直接转换，需要使用 `tensor.detach().numpy()`
+         2. .data为浅拷贝，.data之后的数据改了，之前的也改。.detach反之为深拷贝，数据不变
+
+2. 线性回归实现
+
+   1. ```python
+      import torch
+      import numpy as np
+      from matplotlib import pyplot as plt
+      
+      #1.准备数据y=3x+0.8 准备参数
+      x = torch.rand([500,1])
+      y_true = 3 * x + 0.8
+      
+      w = torch.rand([1,1],requires_grad=True)
+      b = torch.tensor(0,requires_grad=True,dtype=torch.float32)
+      
+      
+      def loss_fn(y_true,y_predict):
+          loss = (y_predict-y_true).pow(2).mean()
+          
+          for i in [w,b]:
+              #每次反向传播前把梯度置为0
+              if i.grad is now None:
+                  i.grad_data.zero_()
+          # [i.grad.data.z ero_() for i in [w,b] if ii.grad is now None]
+          loss.backward()
+          return loss.data
+      
+      def optimize(learning_rate):
+          #print(w.grad.data,w.data,b.data)
+          w.data -= learning_rate * w.grad.data
+          b.data -= learning_rate * b.grad.data
+          
+      for i in range(3000):
+          #2.计算预测值
+          y_predict = x*w + b
+          ## y_predict = torch.matmul(x,w) + b
+          
+          #3.计算损失，把参数的梯度置为0，进行反向传播
+          loss = loss_fn(y_true,y_predict)
+          
+          if i%500 == 0:
+              print(i,loss)
+              
+          #更新参数w和b
+          optimize(0.01)
+      # 绘制图形，观察训练结束的预测值和真实值    
+      y_predict = x*w + b# 使用训练后的w和b计算预测值
+      
+      plt.scatter(x.numpy().reshape(-1),y_true.numpey().reshape(-1))
+      plt.plot(x.numpy().reshape(-1),y_predict.detach().numpy().reshape(-1),c="r")
+      plt.show()
+      
+      print("w",w)
+      print("b",b)
+      ```
+
+3. nn.module
+
+   1. 每一列称为一个维度，即一个特征 
+
+   2. ```python
+      from torch import nn
+      class Lr(nn.Module):
+          def __init__(self):
+              super(Lr,self).__init__()# 继承父类init 的参数
+              self.linear = nn.Linear(1,1)
+              
+          def forward(Self,x):
+              out = self.linear(x)
+              return out
+          
+      # 实例化模型
+      model = Lr()
+      # 传入数据，计算结果
+      predict = model(x)
+      ```
+
+      注意：
+
+      ​		1.`nn.Linear`为torch预定义好的线性模型，也被称为全链接层，传入的参数为输入的数量，输出的数量(in_feature,out_feature),是不算(batch_size的列数)
+
+      ​		2.`nn.Module`定义了 `__call__` 方法，实现的就是调用 `forward` 方法，即`Lr`的实例，能够直接被传入参数调用，实际上调用的是`forward`方法并传入参数
+
+4. 优化器类
+
+   1. 优化器 optimizer
+
+      ```python
+      optimizer = optim.SGD(model.parameters(), lr=le-3)#1.实例化
+      optimizer.zero_grad()#2.梯度置为0
+      loss.backward()#3.计算梯度
+      optimizer.step()#4.更新参数的值
+      ```
+
+5. 损失函数
+
+   1. 均方误差 `nn.MSELoss()`,常用于分类问题
+
+   2. 交叉熵损失： `nn.CrossEntropyLoss()`,常用于逻辑回归
+
+      ```python
+      model =Lr()# 1.实例化模型
+      criterion = nn.MSELoss()#2.实例化损失函数
+      optimizer = optim.SGD(model.parameters(),lr=le-3)#3.实例化优化器类
+      for i in range(100):
+          y_predict = model(x_true)#4.向前计算预测值
+          loss = criterion(y_true,y_predict)#5.调用损失函数传入真实值和预测值，得到损失结果
+          optimizer.zero_grad()#5.当前循环参数梯度置为0
+          loss.backward()#6.计算梯度
+          optimizer.step()#7.更新参数的值
+      ```
+
+6. 把线性回归完整代码
+
+   ```python
+   import torch
+   from torch import nn
+   from torch import optim
+   import numpy as np
+   from matplotlib import pyplot as plt
+   
+   #1.定义数据
+   x = torch.rand([50,1])
+   y = x*3 + 0.8
+   
+   #2.定义模型
+   class Lr(nn.Module):
+       def __init__(self):
+           super(Lr.self).__init__()
+           self.linear = nn.Linear(1,1)
+           
+       def forward(self,x):
+           out = self.linear(x)
+           return out
+       
+   #2.实例化模型，loss，和优化器
+   model = Lr()
+   criterion = nn.MSELoss()
+   optimizer = optim.SGD(model.parameters(),lr=le-3)
+   
+   #3.训练模型
+   for i in range(30000):
+       out = model(x)#3.1获取预测值
+       loss = criterion(y,out)#3.2计算损失
+       optimizer.zero_grad()#3.3梯度归零
+       loss.backward()#3.4计算梯度
+       optimizer.step()#3.5更新梯度
+       if(i+1) % 20 ==0:
+           print('Epoch[{}/{}],loss:{:.6f}'.format(i,30000,loss.data))
+           
+   #4.模型评估
+   model.eval()#设置模型为平谷模式，即预测模式
+   predict = model(x)
+   predict = predict.data.numpy()
+   plt.scatter(x.data.numpy(),y.data.numpy(),c="r")
+   plt.plot(x.data.numpy(),predict)
+   plt.show()
+   ```
+
+   
 
