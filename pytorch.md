@@ -248,7 +248,7 @@
    2. 创建时指定类型：
 
       1. `torch.ones([3,2],dtype=torch.float32)`
-      2. torch.tensor(array,dtype)
+      2. torch.tensor(array, dtype)
 
    3. 获取数据类型：`tensor.dtype`
 
@@ -296,13 +296,13 @@
 
 
 
-1. 梯度
+1. ## 梯度
 
    1. **向量**
    2. 学习（参数更新）的方向（导数+变化最快的方向）
    3. 
 
-2. 梯度下降
+2. ## 梯度下降
 
    1. 算出梯度
       $$
@@ -476,7 +476,7 @@
 
       注意：
 
-      ​		1.`nn.Linear`为torch预定义好的线性模型，也被称为全链接层，传入的参数为输入的数量，输出的数量(in_feature,out_feature),是不算(batch_size的列数)
+      ​		1.`nn.Linear`为torch预定义好的线性模型，也被称为**全链接层**，传入的参数为输入的数量，输出的数量(in_feature,out_feature),是不算(batch_size的列数)
 
       ​		2.`nn.Module`定义了 `__call__` 方法，实现的就是调用 `forward` 方法，即`Lr`的实例，能够直接被传入参数调用，实际上调用的是`forward`方法并传入参数
 
@@ -485,7 +485,7 @@
    1. 优化器 optimizer
 
       ```python
-      optimizer = optim.SGD(model.parameters(), lr=le-3)#1.实例化
+      optimizer = optim.SGD(model.parameters(), lr=1e-3)#1.实例化
       optimizer.zero_grad()#2.梯度置为0
       loss.backward()#3.计算梯度
       optimizer.step()#4.更新参数的值
@@ -500,7 +500,7 @@
       ```python
       model =Lr()# 1.实例化模型
       criterion = nn.MSELoss()#2.实例化损失函数
-      optimizer = optim.SGD(model.parameters(),lr=le-3)#3.实例化优化器类
+      optimizer = optim.SGD(model.parameters(),lr=1e-3)#3.实例化优化器类
       for i in range(100):
           y_predict = model(x_true)#4.向前计算预测值
           loss = criterion(y_true,y_predict)#5.调用损失函数传入真实值和预测值，得到损失结果
@@ -535,7 +535,7 @@
    #2.实例化模型，loss，和优化器
    model = Lr()
    criterion = nn.MSELoss()
-   optimizer = optim.SGD(model.parameters(),lr=le-3)
+   optimizer = optim.SGD(model.parameters(),lr= 1e-3)
    
    #3.训练模型
    for i in range(30000):
@@ -548,7 +548,7 @@
            print('Epoch[{}/{}],loss:{:.6f}'.format(i,30000,loss.data))
            
    #4.模型评估
-   model.eval()#设置模型为平谷模式，即预测模式
+   model.eval()#设置模型为评估模式，即预测模式
    predict = model(x)
    predict = predict.data.numpy()
    plt.scatter(x.data.numpy(),y.data.numpy(),c="r")
