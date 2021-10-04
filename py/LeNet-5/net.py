@@ -16,6 +16,7 @@ class MyLeNet5(nn.Module):
 	def __init__(self):
 		super(MyLeNet5, self).__init__()
 
+		# input 28*28*1，->  28*28*6             5*5*6，  28-5+2*2+1=28
 		self.c1 = nn.Conv2d(in_channels=1, out_channels=6,kernel_size=5, padding=2)
 
 		self.Sigmoid = nn.Sigmoid()
@@ -37,7 +38,7 @@ class MyLeNet5(nn.Module):
 	def forward(self, x):
 		x = self.Sigmoid(self.c1(x))
 
-		x = self.c2(x)
+		x = self.s2(x)
 
 		x= self.Sigmoid(self.c3(x))
 
