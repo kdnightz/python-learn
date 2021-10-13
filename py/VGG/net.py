@@ -80,13 +80,18 @@ cfgs = {
 }
 
 
-def vgg(model_name = "vgg16", **kwargs):
+def vgg(model_name="vgg16", **kwargs):
 	try:
 		cfg = cfgs[model_name]
 	except:
 		print(f'Warning:model num {model_name} is not in cfgs dict!')
+		assert ''
 		exit(-1)
 	model = VGG(make_features(cfg), **kwargs)
 	return model
+
+
+if __name__ == "__main__":
+	vgg()
 
 
